@@ -1,3 +1,4 @@
+<% if appointment.pending? %>
 <hr>
 <div class="modal <%= 'fade' unless Rails.env.test? %> js-rescheduling-modal t-rescheduling-modal" tabindex="-1" role="dialog" aria-labelledby="rescheduling-modal">
   <div class="modal-dialog" role="document">
@@ -30,3 +31,4 @@
 <button type="button" class="btn btn-default btn-block reschedule-btn js-reschedule-button t-reschedule-button">
   Reschedule appointment
 </button>
+<% end %>

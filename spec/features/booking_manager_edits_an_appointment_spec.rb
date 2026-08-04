@@ -31,6 +31,16 @@ RSpec.feature 'Booking Manager edits an Appointment' do
     end
   end
 
+  scenario 'Rescheduling a realtime appointment that is not currently pending', js: true do
+    travel_to '2018-11-01 13:00' do
+      given_the_user_identifies_as_hackneys_booking_manager do
+        and_there_is_a_realtime_appointment(pending: false)
+        when_the_booking_manager_edits_the_appointment
+        then_they_do_not_see_the_rescheduling_button
+      end
+    end
+  end
+
   scenario 'Altering consent on an appointment', js: true do
     travel_to '2018-11-01 13:00' do
       given_the_user_identifies_as_hackneys_booking_manager do
@@ -157,6 +167,12 @@ RSpec.feature 'Booking Manager edits an Appointment' do
     @appointment = create(:appointment, :video)
   end
 
+  def then_they_do_not_see_the_rescheduling_button
+    @page = Pages::EditAppointment.new
+    expect(@page).to be_displayed
+    expect(@page).to have_no_reschedule
+  end
+
   def then_they_do_not_see_the_process_button
     @page = Pages::EditAppointment.new
     expect(@page).to be_displayed
@@ -192,12 +208,13 @@ RSpec.feature 'Booking Manager edits an Appointment' do
     expect(@page).to have_success
   end
 
-  def and_there_is_a_realtime_appointment
+  def and_there_is_a_realtime_appointment(pending: true)
     @slot    = create(:bookable_slot, start_at: '2018-11-15 09:00')
     @booking = build(:hackney_booking_request, video_appointment: true, number_of_slots: 0)
     @booking.slots.build(date: '2018-11-15', from: '0900', to: '1000', priority: 1)
 
-    @appointment = create(:appointment, booking_request: @booking, proceeded_at: @slot.start_at)
+    status = pending ? :pending : :no_show
+    @appointment = create(:appointment, booking_request: @booking, proceeded_at: @slot.start_at, status: status)
   end
 
   def and_available_realtime_slots_exist
